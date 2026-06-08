@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #000000;
+  color: #f3f1e7;
+  font-family: 'Love Ya Like A Sister', cursive;
+  font-size: 1.05rem;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* hide native cursor on devices with fine pointer (custom cursor takes over) */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
+::selection {
+  background: rgba(243, 241, 231, 0.25);
+  color: #fff;
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(243, 241, 231, 0.4);
+  border-radius: 99px;
+}
+
+@layer components {
+  /* chalk-outline boxes on the board */
+  .glass {
+    background: rgba(243, 241, 231, 0.03);
+    border: 1px solid rgba(243, 241, 231, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(243, 241, 231, 0.04);
+  }
+  .glass-strong {
+    background: rgba(243, 241, 231, 0.05);
+    border: 1px solid rgba(243, 241, 231, 0.3);
+    box-shadow: inset 0 0 24px rgba(243, 241, 231, 0.03);
+  }
+  .gradient-text {
+    color: #f3f1e7;
+  }
+  /* hand-drawn chalk underline */
+  .marker-underline {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='14' viewBox='0 0 200 14'%3E%3Cpath d='M3 8 C 50 3, 150 12, 197 6' stroke='%23f3f1e7' stroke-width='3' fill='none' stroke-linecap='round' opacity='0.85'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    background-size: 100% 0.5em;
+    padding-bottom: 0.28em;
+  }
+  .handwrite {
+    font-family: 'Love Ya Like A Sister', cursive;
+  }
+  /* balanced multi-line headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* chalk dust — faint grain over the whole board */
+  .grain::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* rotating animated gradient border for feature cards */
+  .glow-border {
+    position: relative;
+  }
+  .glow-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from var(--a, 0deg), transparent 60%, rgba(243, 241, 231, 0.6), rgba(243, 241, 231, 0.9), transparent);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: borderSpin 6s linear infinite;
+  }
+  .glow-border:hover::before {
+    opacity: 1;
+  }
+}
+
+@property --a {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes borderSpin {
+  to {
+    --a: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
