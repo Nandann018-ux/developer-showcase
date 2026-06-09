@@ -223,6 +223,7 @@ export const certifications = [
     date: 'May 2026',
     desc: 'Data transformation logic with unit tests; software development proposal for machine health.',
     link: '#',
+    image: '/certs/deloitte.png',
   },
   {
     title: 'Hacktoberfest',
@@ -230,6 +231,7 @@ export const certifications = [
     date: '2025',
     desc: 'Merged open-source pull requests across multiple repositories with global maintainers.',
     link: '#',
+    image: '/certs/hacktoberfest.png',
   },
 ]
 

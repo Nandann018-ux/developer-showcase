@@ -96,7 +96,7 @@ export default function Projects() {
                   data-hover
                   whileHover={{ scale: 1.06, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 rounded-full bg-violet-900 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:brightness-125"
+                  className="flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black shadow-lg shadow-white/20 transition hover:brightness-90"
                 >
                   <ExternalLink size={16} /> Live Demo
                 </motion.a>

@@ -74,7 +74,9 @@ function computeStreaks(days) {
 }
 
 function Heatmap({ gh }) {
-  const days = gh?.contributions || []
+  // drop any dates after today so the grid ends at the current day
+  const today = new Date().toISOString().slice(0, 10)
+  const days = (gh?.contributions || []).filter((d) => d.date <= today)
   const total = gh?.total?.lastYear ?? 0
   const { current, longest } = computeStreaks(days)
 
@@ -99,17 +101,23 @@ function Heatmap({ gh }) {
         </div>
 
         {days.length ? (
-          <div className="mt-5 overflow-x-auto pb-2">
-            <div className="grid w-max grid-flow-col grid-rows-7 gap-[3px]">
+          <div className="mt-5 pb-2">
+            <div
+              className="grid w-full grid-flow-col gap-[3px]"
+              style={{
+                gridTemplateRows: 'repeat(7, 1fr)',
+                gridTemplateColumns: `repeat(${Math.ceil((new Date(days[0].date).getDay() + days.length) / 7)}, minmax(0, 1fr))`,
+              }}
+            >
               {/* pad leading days so weekdays line up */}
               {Array.from({ length: new Date(days[0].date).getDay() }).map((_, i) => (
-                <span key={`pad-${i}`} className="h-[11px] w-[11px]" />
+                <span key={`pad-${i}`} className="aspect-square" />
               ))}
               {days.map((d) => (
                 <span
                   key={d.date}
                   title={`${d.count} on ${d.date}`}
-                  className="h-[11px] w-[11px] rounded-[2px]"
+                  className="aspect-square rounded-[2px]"
                   style={{ background: levelColor[d.level] || levelColor[0] }}
                 />
               ))}
@@ -137,11 +145,23 @@ function Heatmap({ gh }) {
             <p className="mt-1 text-xs text-chalk/55">Total Contributions</p>
           </div>
           <div>
-            <p className="text-4xl text-amber-200" style={{ fontFamily: '"Love Ya Like A Sister", cursive' }}>🔥 {current}</p>
+            <p className="flex items-center justify-center gap-1 text-4xl text-amber-200" style={{ fontFamily: '"Love Ya Like A Sister", cursive' }}>
+              <motion.span
+                className="inline-block"
+                style={{ transformOrigin: 'bottom center' }}
+                animate={{ scale: [1, 1.18, 0.95, 1.1, 1], rotate: [0, -6, 5, -3, 0] }}
+                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                🔥
+              </motion.span>
+              {current}
+            </p>
             <p className="mt-1 text-xs text-chalk/55">Current Streak</p>
           </div>
           <div>
-            <p className="text-4xl text-chalk" style={{ fontFamily: '"Love Ya Like A Sister", cursive' }}>{longest}</p>
+            <p className="text-4xl text-chalk" style={{ fontFamily: '"Love Ya Like A Sister", cursive' }}>
+              {longest} <span className="text-2xl text-chalk/60">days</span>
+            </p>
             <p className="mt-1 text-xs text-chalk/55">Longest Streak</p>
           </div>
         </div>

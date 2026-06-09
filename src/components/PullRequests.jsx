@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
-import { GitPullRequest, ArrowUpRight, GitMerge } from 'lucide-react'
+import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion'
+import { GitPullRequest, ArrowUpRight, GitMerge, ChevronRight } from 'lucide-react'
 import TiltCard from './TiltCard'
 import { pullRequests } from '../data/portfolio'
 
@@ -46,7 +46,7 @@ function PrCard({ pr, i }) {
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
           )}
-          <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-blue-500/80 px-3 py-1 text-xs font-medium text-chalk backdrop-blur">
+          <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-purple-600/85 px-3 py-1 text-xs font-medium text-chalk backdrop-blur">
             <GitMerge size={13} /> Merged
           </div>
           <span className="absolute right-3 top-3 font-mono text-xs text-chalk/70">
@@ -85,9 +85,11 @@ function PrCard({ pr, i }) {
 
 export default function PullRequests() {
   const sectionRef = useRef(null)
+  const containerRef = useRef(null)
   const trackRef = useRef(null)
   const [shift, setShift] = useState(0)
   const [enabled, setEnabled] = useState(true)
+  const [atEnd, setAtEnd] = useState(false)
 
   // horizontal distance the track must travel so the last card reaches the edge
   useLayoutEffect(() => {
@@ -97,8 +99,11 @@ export default function PullRequests() {
         return
       }
       const track = trackRef.current
-      if (!track) return
-      const dist = track.scrollWidth - window.innerWidth + 48
+      const container = containerRef.current
+      if (!track || !container) return
+      // overflow of the track past the container's inner content width
+      // (clientWidth includes the px-6 padding on both sides → subtract 48)
+      const dist = track.scrollWidth - (container.clientWidth - 48)
       setShift(Math.max(0, dist))
     }
     measure()
@@ -115,6 +120,15 @@ export default function PullRequests() {
   // accent rail follows progress
   const rail = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
 
+  // hide the "scroll to end" button once we're basically at the end
+  useMotionValueEvent(scrollYProgress, 'change', (v) => setAtEnd(v > 0.96))
+
+  const scrollToEnd = () => {
+    const sec = sectionRef.current
+    if (!sec) return
+    window.scrollTo({ top: sec.offsetTop + shift, behavior: 'smooth' })
+  }
+
   const header = (
     <div className="mx-auto mb-10 w-full max-w-6xl px-6">
       <p className="mb-3 flex items-center gap-3 text-sm font-medium uppercase tracking-[0.3em] text-amber-200/80">
@@ -127,8 +141,13 @@ export default function PullRequests() {
         in motion.
       </h2>
       <p className="mt-4 max-w-xl text-chalk/70">
-        Eight merged pull requests across Apache Airflow, Marked, React-Router, Axios and Shiki —
-        slide sideways as you scroll, and reverse when you move back up.
+        Eight merged pull requests across{' '}
+        <span className="font-semibold text-amber-200">Apache Airflow</span>,{' '}
+        <span className="font-semibold text-amber-200">Marked</span>,{' '}
+        <span className="font-semibold text-amber-200">React-Router</span>,{' '}
+        <span className="font-semibold text-amber-200">Axios</span> and{' '}
+        <span className="font-semibold text-amber-200">Shiki</span> — slide sideways as you
+        scroll, and reverse when you move back up.
       </p>
     </div>
   )
@@ -164,13 +183,39 @@ export default function PullRequests() {
           <motion.div style={{ width: rail }} className="h-full bg-chalk/80" />
         </div>
 
-        <div className="mx-auto w-full max-w-6xl px-6">
-          <motion.div ref={trackRef} style={{ x }} className="flex gap-6">
-            {pullRequests.map((pr, i) => (
-              <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} i={i} />
-            ))}
+        <div ref={containerRef} className="relative mx-auto w-full max-w-6xl overflow-hidden px-6">
+          {/* outer: scroll-driven drift · inner: manual swipe/drag */}
+          <motion.div style={{ x }}>
+            <motion.div
+              ref={trackRef}
+              drag="x"
+              dragConstraints={{ left: -shift, right: 0 }}
+              dragElastic={0.08}
+              dragMomentum={false}
+              className="flex w-max cursor-grab gap-6 active:cursor-grabbing"
+            >
+              {pullRequests.map((pr, i) => (
+                <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} i={i} />
+              ))}
+            </motion.div>
           </motion.div>
         </div>
+
+        {/* jump-to-end button — reveals the last cards that scroll can't reach */}
+        <motion.button
+          type="button"
+          onClick={scrollToEnd}
+          aria-label="Scroll to last pull request"
+          data-hover
+          initial={false}
+          animate={{ opacity: atEnd ? 0 : 1, x: atEnd ? 12 : 0 }}
+          style={{ pointerEvents: atEnd ? 'none' : 'auto' }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.94 }}
+          className="absolute right-5 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-chalk/25 bg-ink/70 text-chalk shadow-lg backdrop-blur transition-colors hover:border-chalk/50 md:right-8"
+        >
+          <ChevronRight size={22} />
+        </motion.button>
       </div>
     </section>
   )

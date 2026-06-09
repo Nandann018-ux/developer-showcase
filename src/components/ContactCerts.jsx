@@ -45,7 +45,7 @@ export default function ContactCerts() {
                     rel="noreferrer"
                     data-hover
                     whileHover={{ y: -4 }}
-                    className="glow-border group flex gap-4 rounded-3xl glass-strong p-6"
+                    className="glow-border group relative flex gap-4 overflow-hidden rounded-3xl glass-strong p-6"
                   >
                     <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-coral text-white">
                       <BadgeCheck size={22} />
@@ -62,6 +62,18 @@ export default function ContactCerts() {
                       </p>
                       <p className="mt-2 text-sm text-chalk/70">{c.desc}</p>
                     </div>
+
+                    {/* certificate image — fades in over the card on hover */}
+                    {c.image && (
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-3xl bg-ink/90 opacity-0 backdrop-blur-sm transition-opacity duration-500 ease-out group-hover:opacity-100">
+                        <img
+                          src={c.image}
+                          alt={`${c.title} certificate`}
+                          loading="lazy"
+                          className="max-h-[90%] max-w-[92%] scale-95 rounded-xl object-contain shadow-2xl transition-transform duration-500 ease-out group-hover:scale-100"
+                        />
+                      </div>
+                    )}
                   </motion.a>
                 </Reveal>
               )

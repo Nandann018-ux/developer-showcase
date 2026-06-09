@@ -30,6 +30,7 @@ export default function ChalkCursor() {
 
     let lastX = null
     let lastY = null
+    let lastMove = performance.now()
     const dust = []
 
     const addDust = (x, y, n) => {
@@ -69,14 +70,17 @@ export default function ChalkCursor() {
       }
       lastX = x
       lastY = y
+      lastMove = performance.now()
     }
     window.addEventListener('mousemove', onMove)
 
     let raf
-    const loop = () => {
+    const loop = (now) => {
       // gently fade the whole canvas so chalk strokes dissolve like dust
       ctx.globalCompositeOperation = 'destination-out'
-      ctx.fillStyle = 'rgba(0,0,0,0.045)'
+      // after 5s of no movement, hard-fade so faint residue can't linger
+      const idle = now - lastMove > 5000
+      ctx.fillStyle = idle ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.045)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       ctx.globalCompositeOperation = 'source-over'
 
